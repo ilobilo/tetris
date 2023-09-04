@@ -1,0 +1,1 @@
+option('green_foreground', type : 'boolean', value : false, description : 'Use green text for Tetris')
