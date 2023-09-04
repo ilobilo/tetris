@@ -18,6 +18,10 @@ fmt_opts.add_cmake_defines({ 'FMT_INSTALL' : false })
 fmt_dep = cmake.subproject('fmt', options : fmt_opts).dependency('fmt')
 frozen_dep = cmake.subproject('frozen').dependency('frozen')
 
+if get_option('green_foreground')
+    add_project_arguments('-DTETRIS_GREEN_TEXT', language : 'cpp')
+endif
+
 executable('tetris',
     dependencies : [
         fmt_dep, frozen_dep

@@ -30,8 +30,12 @@ namespace tetris
     {
         private:
         using storage_type = std::vector<std::vector<int>>;
-
+        storage_type shape;
         ids id;
+
+        void getexts();
+
+        public:
         postype x;
         postype y;
 
@@ -40,50 +44,29 @@ namespace tetris
         postype xmin;
         postype xmax;
 
-        storage_type shape;
         board *brd;
 
-        void getexts()
-        {
-            this->ymin = 0;
-            this->ymax = 0;
-            this->xmin = 0;
-            this->xmax = 0;
-            bool ym = true;
-            bool xm = true;
-
-            for (size_t yi = 0; const auto &y : shape)
-            {
-                for (size_t xi = 0; const auto &x : y)
-                {
-                    if (x == used)
-                    {
-                        if (ym == true)
-                        {
-                            ym = false;
-                            this->ymin = yi;
-                        }
-
-                        if (xm == true)
-                        {
-                            xm = false;
-                            this->xmin = xi;
-                        }
-                        else this->xmin = std::min(this->xmin, postype(xi));
-
-                        this->xmax = std::max(this->xmax, postype(xi));
-                        this->ymax = yi;
-                    }
-                    xi++;
-                }
-                yi++;
-            }
-        }
-
-        public:
-        piece(ids id, storage_type shape) :
-            id(id), x(startx - (shape.size() - 2)), y(starty - 1), shape(std::move(shape)), brd(nullptr)
+        piece(ids id, postype x, postype y, storage_type shape) :
+            shape(std::move(shape)), id(id), x(x), y(y), brd(nullptr)
         { this->getexts(); }
+
+        ids type() const { return this->id; }
+        postype size() const { return this->shape.size(); }
+        const storage_type &data() const { return this->shape; }
+
+        auto getat(postype ax, postype ay) const
+        {
+            auto rx = ax - this->x;
+            auto ry = ay - this->y;
+
+            if (rx < 0 || rx > this->size() - 1)
+                return unused;
+
+            if (ry < 0 || ry > this->size() - 1)
+                return unused;
+
+            return this->shape[ry][rx];
+        }
 
         piece clone(postype nx, postype ny)
         {
@@ -92,38 +75,6 @@ namespace tetris
             ret.y = ny;
             return ret;
         }
-
-        void setboard(board *brd) { this->brd = brd; }
-
-        std::pair<size_t, size_t> position() const
-        {
-            return { this->x, this->y };
-        }
-        ids type() const { return this->id; }
-        postype size() const { return this->shape.size(); }
-
-        postype getx() const { return this->x; }
-        postype gety() const { return this->y; }
-
-        postype getxmin() const { return this->xmin; }
-        postype getxmax() const { return this->xmax; }
-        postype getymin() const { return this->ymin; }
-        postype getymax() const { return this->ymax; }
-
-        bool getat(postype ax, postype ay) const
-        {
-            auto rx = ax - this->x;
-            auto ry = ay - this->y;
-
-            if (rx < 0 || rx > this->size() - 1)
-                return false;
-
-            if (ry < 0 || ry > this->size() - 1)
-                return false;
-
-            return this->shape[ry][rx];
-        }
-        const storage_type &data() const { return this->shape; }
 
         bool move(direction direct);
         void rotate();

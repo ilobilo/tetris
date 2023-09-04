@@ -4,8 +4,53 @@
 #include <tetris.hpp>
 #include <chrono>
 
+#ifdef TETRIS_GREEN_TEXT
+#  include <fmt/color.h>
+#  define _TETRIS_COLOUR fmt::fg(fmt::terminal_color::green),
+#else
+#  define _TETRIS_COLOUR
+#endif
+
 namespace tetris
 {
+    void piece::getexts()
+    {
+        this->ymin = 0;
+        this->ymax = 0;
+        this->xmin = 0;
+        this->xmax = 0;
+
+        bool ym = true;
+        bool xm = true;
+
+        for (size_t yi = 0; const auto &y : shape)
+        {
+            for (size_t xi = 0; const auto &x : y)
+            {
+                if (x == used)
+                {
+                    if (ym == true)
+                    {
+                        ym = false;
+                        this->ymin = yi;
+                    }
+
+                    if (xm == true)
+                    {
+                        xm = false;
+                        this->xmin = xi;
+                    }
+                    else this->xmin = std::min(this->xmin, postype(xi));
+
+                    this->xmax = std::max(this->xmax, postype(xi));
+                    this->ymax = yi;
+                }
+                xi++;
+            }
+            yi++;
+        }
+    }
+
     bool piece::move(direction direct)
     {
         switch (direct)
@@ -60,54 +105,54 @@ namespace tetris
     static const auto pieces = frozen::make_map<ids, const piece>(
     {
         { ids::I, {
-            ids::I, {
+            ids::I, startx - 2, starty - 1, {
                 { 0, 0, 0, 0 },
                 { 1, 1, 1, 1 },
                 { 0, 0, 0, 0 },
-                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 }
             }
         } },
         { ids::O, {
-            ids::O, {
+            ids::O, startx - 2, starty - 1, {
                 { 0, 0, 0, 0 },
                 { 0, 1, 1, 0 },
                 { 0, 1, 1, 0 },
-                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 }
             }
         } },
         { ids::Sr, {
-            ids::Sr, {
+            ids::Sr, startx - 1, starty - 1, {
                 { 0, 0, 0 },
                 { 0, 1, 1 },
-                { 1, 1, 0 },
+                { 1, 1, 0 }
             }
         } },
         { ids::Sl, {
-            ids::Sl, {
+            ids::Sl, startx - 1, starty - 1, {
                 { 0, 0, 0 },
                 { 1, 1, 0 },
-                { 0, 1, 1 },
+                { 0, 1, 1 }
             }
         } },
         { ids::Lr, {
-            ids::Lr, {
+            ids::Lr, startx - 1, starty - 1, {
                 { 0, 0, 0 },
                 { 1, 1, 1 },
-                { 0, 0, 1 },
+                { 0, 0, 1 }
             }
         } },
         { ids::Ll, {
-            ids::Ll, {
+            ids::Ll, startx - 1, starty - 1, {
                 { 0, 0, 0 },
                 { 1, 1, 1 },
-                { 1, 0, 0 },
+                { 1, 0, 0 }
             }
         } },
         { ids::T, {
-            ids::T, {
+            ids::T, startx - 1, starty - 1, {
                 { 0, 0, 0 },
                 { 1, 1, 1 },
-                { 0, 1, 0 },
+                { 0, 1, 0 }
             }
         } }
     });
@@ -122,26 +167,24 @@ namespace tetris
             return false;
 
         auto ret = std::make_unique<piece>(pc);
-        ret->setboard(this);
+        ret->brd = this;
         this->current_piece = std::move(ret);
         return true;
     }
 
     bool board::collides(piece pc)
     {
-        auto px = pc.getx();
-        auto py = pc.gety();
-
-        for (auto y = py + pc.getymin(); y <= py + pc.getymax(); y++)
+        for (auto y = pc.y + pc.ymin; y <= pc.y + pc.ymax; y++)
         {
-            for (auto x = px + pc.getxmin(); x <= px + pc.getxmax(); x++)
+            if (y < 0)
+                continue;
+            for (auto x = pc.x + pc.xmin; x <= pc.x + pc.xmax; x++)
             {
                 if (x < 0 || x >= board_size.first)
                     return true;
 
                 if (pc.getat(x, y) == used && this->array[y][x] == used)
-                    // if (pc.getat(x, y - 1) != used)
-                        return true;
+                    return true;
             }
         }
         return false;
@@ -175,19 +218,19 @@ namespace tetris
             return;
 
         auto &ref = this->current_piece;
-        auto py = ref->gety();
-        auto px = ref->getx();
+        auto py = ref->y;
+        auto px = ref->x;
 
-        for (auto y = py + ref->getymin(); y <= py + ref->getymax(); y++)
+        for (auto y = py + ref->ymin; y <= py + ref->ymax; y++)
         {
             if (y < 0)
                 continue;
-            for (auto x = px + ref->getxmin(); x <= px + ref->getxmax(); x++)
+            for (auto x = px + ref->xmin; x <= px + ref->xmax; x++)
             {
                 if (x < 0)
                     continue;
                 if (this->current_piece->getat(x, y))
-                    this->array[y][x] = true;
+                    this->array[y][x] = used;
             }
         }
         this->current_piece.reset();
@@ -197,17 +240,17 @@ namespace tetris
     {
         for (auto y = 0; y < board_size.second; y++)
         {
-            fmt::print("<!");
+            fmt::print(_TETRIS_COLOUR "<!");
             for (auto x = 0; x < board_size.first; x++)
             {
                 bool usd = this->array[y][x];
                 if (this->current_piece)
                     usd = usd || this->current_piece->getat(x, y);
-                fmt::print("{}", usd ? "[]" : " .");
+                fmt::print(_TETRIS_COLOUR "{}", usd ? "[]" : " .");
             }
-            fmt::println("!>\r");
+            fmt::print(_TETRIS_COLOUR "!>\n");
         }
-        fmt::println("<!{:=>{}}!>\r", "", board_size.first * 2);
+        fmt::print(_TETRIS_COLOUR "<!{:=>{}}!>\n", "", board_size.first * 2);
     }
 
     ids game::genid()
@@ -223,10 +266,11 @@ namespace tetris
     void game::start()
     {
         using namespace std::chrono_literals;
-        constexpr auto delay = 500ms;
+        auto delay = 500ms;
 
         auto end = std::chrono::steady_clock::now() + delay;
-        this->brd.add_piece(this->genid());
+        assert(this->brd.add_piece(this->genid()));
+
         this->redraw();
 
         while (true)
@@ -271,6 +315,13 @@ namespace tetris
                 if (this->brd.add_piece(this->genid()) == false)
                     break;
             }
+
+            static auto oldscore = 0;
+            if (this->score >= (oldscore + 100) && delay > 50ms)
+            {
+                oldscore = this->score;
+                delay -= 50ms;
+            }
             this->redraw();
         }
     }
@@ -286,7 +337,7 @@ namespace tetris
             this->score += ly; // TODO: <-- incorrect
         }
 
-        fmt::println("<!{: ^{}}!>\r", fmt::format("Score: {}", this->score), board_size.first * 2);
+        fmt::print(_TETRIS_COLOUR "<!{: ^{}}!>\n", fmt::format("Score: {}", this->score), board_size.first * 2);
         this->brd.draw();
     }
 } // namespace tetris
