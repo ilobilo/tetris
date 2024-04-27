@@ -1,5 +1,5 @@
 # Tetris
-Small Tetris clone in C++
+Small colourful Tetris clone in C++
 
 ## Controls
 * `a`/`left`: Move left

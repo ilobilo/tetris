@@ -39,7 +39,7 @@ namespace tetris
         std::size_t lines = 0;
         for (std::size_t i = 0; auto &line : this->buffer)
         {
-            if (std::all_of(line.begin(), line.end(), [](auto a) { return a == true; }))
+            if (std::all_of(line.begin(), line.end(), [](auto a) { return a != 0; }))
             {
                 std::memmove(std::next(this->buffer.begin(), 1), this->buffer.begin(), sizeof(this->buffer[0]) * i);
                 lines++;
@@ -107,7 +107,7 @@ namespace tetris
                         continue;
 
                     if (pc.at(x - pc.x, y - pc.y))
-                        this->buffer[y][x] = true;
+                        this->buffer[y][x] = pc.colour;
                 }
             }
         }
@@ -138,16 +138,16 @@ namespace tetris
 
     void board_t::draw(std::string_view title) const
     {
-        auto printat = [&](auto x, auto y, auto str)
+        auto printat = [&](auto x, auto y, auto str, std::size_t colour = 8)
         {
-            this->term.printat(x, y, str);
+            this->term.printat(x, y, str, colour);
         };
 
         // board
         {
             // title
             assert((title.length() - 2) <= (required_width - 2));
-            this->term.printat((required_width / 2) - (title.length() / 2), 0, title);
+            printat((required_width / 2) - (title.length() / 2), 0, title);
 
             // left and right borders
             for (std::size_t y = 0; y < (vsquares + 1); y++)
@@ -180,10 +180,9 @@ namespace tetris
                     (cp.at(x - cp.x, y - cp.y));
 
                 if (is_current_falling)
-                    printat(x * chars::nch + 1, y + 1, chars::falling);
-
-                if (this->buffer[y][x])
-                    printat(x * chars::nch + 1, y + 1, chars::full);
+                    printat(x * chars::nch + 1, y + 1, chars::falling, cp.colour);
+                else if (this->buffer[y][x])
+                    printat(x * chars::nch + 1, y + 1, chars::full, this->buffer[y][x]);
             }
         }
     }
