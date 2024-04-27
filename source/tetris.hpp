@@ -26,7 +26,7 @@ namespace tetris
         private:
         terminal &term;
 
-        std::array<std::array<bool, hsquares>, vsquares> buffer;
+        std::array<std::array<std::size_t, hsquares>, vsquares> buffer;
         piece current_piece;
         bool falling;
 
@@ -39,7 +39,7 @@ namespace tetris
 
         public:
         board_t(terminal &term) :
-            term(term), buffer { }, current_piece { 0, 0 }, falling { false },
+            term(term), buffer { }, current_piece { 0, 0, 8 }, falling { false },
             rd { }, mt { rd() }, dist { 0, 34 }, history { 7, 0, 0, 0 } { }
 
         bool is_falling() const { return this->falling; }

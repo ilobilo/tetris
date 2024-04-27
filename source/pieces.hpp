@@ -60,10 +60,12 @@ namespace tetris
         ssize_t x;
         ssize_t y;
 
-        constexpr piece(const glm::i8mat4 cdata, std::size_t size) :
+        std::size_t colour;
+
+        constexpr piece(const glm::i8mat4 cdata, std::size_t size, std::size_t colour) :
             data { cdata }, size { size },
             xmin { 0 }, xmax { 0 }, ymin { 0 }, ymax { 0 },
-            x { 0 }, y { 0 }
+            x { 0 }, y { 0 }, colour { colour }
         {
             this->calculate_extents();
         }
@@ -98,48 +100,48 @@ namespace tetris
             { 1, 1, 1, 1 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 }
-        }, 4 },
+        }, 4, 1 },
         // J
         { {
             { 1, 0, 0, 0 },
             { 1, 1, 1, 0 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 }
-        }, 3 },
+        }, 3, 2 },
         // L
         { {
             { 0, 0, 1, 0 },
             { 1, 1, 1, 0 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 }
-        }, 3 },
+        }, 3, 3 },
         // O
         { {
             { 1, 1, 0, 0 },
             { 1, 1, 0, 0 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 }
-        }, 2 },
+        }, 2, 4 },
         // S
         { {
             { 0, 1, 1, 0 },
             { 1, 1, 0, 0 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 }
-        }, 3 },
-        // T
-        { {
-            { 0, 1, 0, 0 },
-            { 1, 1, 1, 0 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 }
-        }, 3 },
+        }, 3, 5 },
         // Z
         { {
             { 1, 1, 0, 0 },
             { 0, 1, 1, 0 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 }
-        }, 3 }
+        }, 3, 6 },
+        // T
+        { {
+            { 0, 1, 0, 0 },
+            { 1, 1, 1, 0 },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 }
+        }, 3, 7 }
     };
 } // namespace tetris
