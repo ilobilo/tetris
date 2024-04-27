@@ -26,6 +26,8 @@ namespace tetris
 
             namespace corners
             {
+                inline constexpr auto topleft = "┏";
+                inline constexpr auto topright = "┓";
                 inline constexpr auto botleft = "┗";
                 inline constexpr auto botright = "┛";
             } // namespace corners

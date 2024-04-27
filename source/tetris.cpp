@@ -145,25 +145,31 @@ namespace tetris
 
         // board
         {
-            // title
-            assert((title.length() - 2) <= (required_width - 2));
-            printat((required_width / 2) - (title.length() / 2), 0, title);
-
             // left and right borders
-            for (std::size_t y = 0; y < (vsquares + 1); y++)
+            for (std::size_t y = 1; y < (vsquares + 1); y++)
             {
                 printat(0, y, chars::border::vertical);
                 printat(required_width - 1, y, chars::border::vertical);
             }
 
-            // bottom border
+            // top and bottom borders
             const auto y = vsquares + 1;
+
+            printat(0, 0, chars::border::corners::topleft);
             printat(0, y, chars::border::corners::botleft);
 
             for (std::size_t x = 1; x < (required_width - 1); x++)
+            {
+                printat(x, 0, chars::border::horizontal);
                 printat(x, y, chars::border::horizontal);
+            }
 
+            printat(required_width - 1, 0, chars::border::corners::topright);
             printat(required_width - 1, y, chars::border::corners::botright);
+
+            // title
+            assert((title.length() - 2) <= (required_width - 2));
+            printat((required_width / 2) - (title.length() / 2), 0, title);
         }
 
         // pieces
@@ -288,6 +294,6 @@ namespace tetris
         }
 
         if (game_over)
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 } // namespace tetris
