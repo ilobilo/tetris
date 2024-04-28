@@ -28,6 +28,7 @@ namespace tetris
 
         std::array<std::array<std::size_t, hsquares>, vsquares> buffer;
         piece current_piece;
+        piece ghost;
         bool falling;
 
         std::random_device rd;
@@ -39,7 +40,7 @@ namespace tetris
 
         public:
         board_t(terminal &term) :
-            term(term), buffer { }, current_piece { 0, 0, 8 }, falling { false },
+            term(term), buffer { }, current_piece { }, ghost { }, falling { false },
             rd { }, mt { rd() }, dist { 0, 34 }, history { 7, 0, 0, 0 } { }
 
         bool is_falling() const { return this->falling; }

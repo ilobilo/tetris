@@ -16,6 +16,7 @@ namespace tetris
     {
         inline constexpr auto full =  "██";
         inline constexpr auto falling = "▒▒";
+        inline constexpr auto ghost = "░░";
 
         inline constexpr std::size_t nch = 2;
 

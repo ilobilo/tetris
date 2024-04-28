@@ -62,6 +62,7 @@ namespace tetris
 
         std::size_t colour;
 
+        constexpr piece() : piece { 0, 0, 8 } { }
         constexpr piece(const glm::i8mat4 cdata, std::size_t size, std::size_t colour) :
             data { cdata }, size { size },
             xmin { 0 }, xmax { 0 }, ymin { 0 }, ymax { 0 },
