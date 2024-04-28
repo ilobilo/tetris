@@ -103,6 +103,15 @@ namespace tetris
         if (this->check(pc))
         {
             this->current_piece = pc;
+            { // ghost piece
+                piece tmp { };
+                do {
+                    tmp = pc;
+                    pc.y++;
+                } while ((pc.y + pc.ymax) < ssize_t(vsquares) && this->check(pc));
+
+                this->ghost = tmp;
+            }
             return false;
         }
         pc = this->current_piece;
@@ -194,15 +203,20 @@ namespace tetris
                 const auto &cp = this->current_piece;
                 const ssize_t cps = cp.get_size();
 
-                bool is_current_falling = this->falling &&
-                    (cp.x <= ssize_t(x) && ssize_t(x) < (cp.x + cps)) &&
-                    (cp.y <= ssize_t(y) && ssize_t(y) < (cp.y + cps)) &&
-                    (cp.at(x - cp.x, y - cp.y));
+                auto is_current_falling = [this, cps, x, y](const auto &cp)
+                {
+                    return this->falling &&
+                        (cp.x <= ssize_t(x) && ssize_t(x) < (cp.x + cps)) &&
+                        (cp.y <= ssize_t(y) && ssize_t(y) < (cp.y + cps)) &&
+                        (cp.at(x - cp.x, y - cp.y));
+                };
 
-                if (is_current_falling)
+                if (is_current_falling(cp))
                     printat(x * chars::nch + 1, y + 1, chars::falling, cp.colour);
                 else if (this->buffer[y][x])
                     printat(x * chars::nch + 1, y + 1, chars::full, this->buffer[y][x]);
+                else if (is_current_falling(this->ghost))
+                    printat(x * chars::nch + 1, y + 1, chars::ghost, 3);
             }
         }
     }
