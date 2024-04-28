@@ -73,8 +73,22 @@ namespace tetris
                 {
                     if (pc.y + pc.ymin > 0)
                     {
-                        pc.y--;
-                        pc.rotate();
+                        // pc.y--;
+                        // pc.rotate();
+
+                        tmp = pc;
+                        tmp.y--;
+                        tmp.rotate();
+                        if (this->check(tmp) == false)
+                        {
+                            if ((tmp.x + tmp.xmin) < 0)
+                                pc.x -= (tmp.x + tmp.xmin);
+                            else if ((tmp.x + tmp.xmax) >= ssize_t(hsquares - 1))
+                                pc.x--;
+
+                            pc.rotate();
+                        }
+                        else pc = tmp;
                     }
                 }
                 else pc = tmp;
