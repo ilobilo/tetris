@@ -64,7 +64,9 @@ namespace tetris
         std::size_t lines;
 
         public:
-        game() : term { }, board { term }, level { 1 }, lines { 0 } { }
+        bool game_over;
+
+        game() : term { }, board { term }, level { 1 }, lines { 0 }, game_over { false } { }
 
         void start();
 

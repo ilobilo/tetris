@@ -4,18 +4,15 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <signal.h>
+
+tetris::game game;
 auto main() -> int
 {
-    std::size_t level = 0;
-    std::size_t lines = 0;
-    {
-        tetris::game game;
-        game.start();
+    signal(SIGINT, [](int) { game.game_over = true; });
+    game.start();
 
-        auto score = game.get_score();
-        level = score.first;
-        lines = score.second;
-    }
+    auto [level, lines] = game.get_score();
     std::cout << "Game over. level: " << level << ", extra lines: " << lines << std::endl;
 
     return EXIT_SUCCESS;

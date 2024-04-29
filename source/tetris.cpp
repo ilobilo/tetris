@@ -1,13 +1,13 @@
 // Copyright (C) 2024 ilobilo
 
 #include <tetris.hpp>
-#include <thread>
 #include <chrono>
 #include <cmath>
 
 namespace tetris
 {
     static constexpr std::size_t required_width = 1 + (hsquares * chars::nch) + 1;
+    static constexpr auto softdrop_delay = std::chrono::milliseconds(10);
 
     // this is terrible
     std::size_t board_t::random()
@@ -223,8 +223,6 @@ namespace tetris
 
     void game::start()
     {
-        static constexpr auto speedup_speed = std::chrono::milliseconds(10);
-
         auto get_delay = [&]
         {
             return std::chrono::milliseconds(static_cast<std::size_t>(std::pow(0.8 - ((this->level - 1) * 0.007), this->level - 1) * 1000));
@@ -249,20 +247,20 @@ namespace tetris
             this->term.refresh();
         };
 
+        this->term.init();
         this->board.add_piece();
         update();
 
         auto end = std::chrono::steady_clock::now() + delay;
-        bool game_over = false;
 
-        while (game_over == false)
+        while (this->game_over == false)
         {
             auto now = std::chrono::steady_clock::now();
 
             if (this->board.is_falling() == false)
                 this->board.add_piece();
 
-            bool speedup = false;
+            bool softdrop = false;
             bool should_update = false;
             switch (this->term.getkey())
             {
@@ -283,14 +281,14 @@ namespace tetris
                     break;
                 case KEY_DOWN:
                 case 's':
-                    speedup = true;
+                    softdrop = true;
                     break;
                 case ' ':
                     while (this->board.is_falling() == true)
                     {
                         if (this->board.move(movements::down))
                         {
-                            game_over = true;
+                            this->game_over = true;
                             goto update;
                         }
                     }
@@ -300,12 +298,12 @@ namespace tetris
                 case 'Q':
                 case 'x':
                 case 'X':
-                    return;
+                    goto exit;
                 default:
                     break;
             }
 
-            if (now < (speedup ? end - (delay - speedup_speed) : end))
+            if (now < (softdrop ? end - (delay - softdrop_delay) : end))
             {
                 if (should_update)
                     goto update;
@@ -315,13 +313,12 @@ namespace tetris
 
             if (this->board.is_falling() == true)
                 if (this->board.move(movements::down))
-                    game_over = true;
+                    this->game_over = true;
 
             update:
             update();
         }
-
-        if (game_over)
-            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        exit:
+        this->term.deinit();
     }
 } // namespace tetris
