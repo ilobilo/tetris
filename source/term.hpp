@@ -37,10 +37,21 @@ namespace tetris
 
     struct terminal
     {
+        bool inited;
         bool colours;
 
-        terminal()
+        constexpr terminal() : inited { false }, colours { false } { }
+
+        ~terminal()
         {
+            this->deinit();
+        }
+
+        void init()
+        {
+            if (this->inited)
+                return;
+
             std::locale::global(std::locale(""));
 
             auto scr = initscr();
@@ -70,11 +81,17 @@ namespace tetris
 
             clear();
             refresh();
+
+            this->inited = true;
         }
 
-        ~terminal()
+        void deinit()
         {
-            endwin();
+            if (this->inited == true)
+            {
+                endwin();
+                this->inited = false;
+            }
         }
 
         std::size_t width() { return COLS; }
@@ -85,11 +102,16 @@ namespace tetris
 
         auto getkey()
         {
+            if (this->inited == false)
+                return 0;
             return getch();
         }
 
         void printat(std::size_t x, std::size_t y, std::string_view str, std::size_t colour)
         {
+            if (this->inited == false)
+                return;
+
             if (this->colours)
                 attron(COLOR_PAIR(colour));
             mvprintw(y, x, "%.*s", static_cast<int>(str.length()), str.data());
