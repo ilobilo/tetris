@@ -227,7 +227,9 @@ namespace tetris
         {
             return std::chrono::milliseconds(static_cast<std::size_t>(std::pow(0.8 - ((this->level - 1) * 0.007), this->level - 1) * 1000));
         };
+
         auto delay = get_delay();
+        bool paused = false;
 
         auto update = [&]
         {
@@ -243,7 +245,7 @@ namespace tetris
                 delay = get_delay();
 
             this->term.clear();
-            this->board.draw("level: " + std::to_string(this->level) + " - " + std::to_string(this->lines) + "/10");
+            this->board.draw(paused ? " Paused " : " Level: " + std::to_string(this->level) + " - " + std::to_string(this->lines) + "/10 ");
             this->term.refresh();
         };
 
@@ -257,12 +259,31 @@ namespace tetris
         {
             auto now = std::chrono::steady_clock::now();
 
+            bool softdrop = false;
+            bool should_update = false;
+
             if (this->board.is_falling() == false)
                 this->board.add_piece();
 
-            bool softdrop = false;
-            bool should_update = false;
-            switch (this->term.getkey())
+            auto key = this->term.getkey();
+            switch (key)
+            {
+                case 'P':
+                case 'p':
+                    paused = !paused;
+                    goto update;
+                case 'q':
+                case 'Q':
+                case 'x':
+                case 'X':
+                    goto exit;
+                default:
+                    break;
+            }
+            if (paused == true)
+                continue;
+
+            switch (key)
             {
                 case KEY_LEFT:
                 case 'a':
@@ -294,11 +315,6 @@ namespace tetris
                     }
                     should_update = true;
                     break;
-                case 'q':
-                case 'Q':
-                case 'x':
-                case 'X':
-                    goto exit;
                 default:
                     break;
             }
