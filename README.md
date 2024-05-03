@@ -7,6 +7,7 @@ Small colourful Tetris clone in C++
 * `w`/`up`: Rotate
 * `s`/`down`: Soft drop
 * `space`: Hard drop
+* `p`: Pause
 * `q`/`x`: Quit
 
 ## Building and Running
